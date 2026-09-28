@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0e0d24">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Godfather EA</title>
+<style>
+:root{
+  --night:#0e0d24; --card:#202020; --line:#bdbdbd; --text:#fff; --muted:#a9a9a9;
+  --sky:#35b3e6; --pill:#000; --green:#1f9d3a; --error:#ff8a80;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--sky:#1f7ea6}}
+:root[data-theme="dark"]{--sky:#1f7ea6}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+html,body{height:100%;margin:0}
+body{background:var(--night);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.screen{display:none;min-height:100%;box-sizing:border-box}
+.screen.on{display:flex}
+
+/* Login */
+#login{align-items:center;justify-content:center;padding:24px;
+  background:radial-gradient(120% 80% at 70% 0%,#2a1f5c 0%,var(--night) 60%)}
+.card{width:100%;max-width:420px;background:var(--card);border-radius:28px;padding:28px 24px 32px;text-align:center}
+.logo{width:88px;height:88px;border-radius:24px;background:#fff;margin:0 auto 18px;display:grid;place-items:center}
+h1{font-size:1.5rem;letter-spacing:.02em;margin:0 0 26px}
+.field{position:relative;display:block;margin-bottom:16px;text-align:left}
+.field span{position:absolute;top:-9px;left:16px;padding:0 6px;background:var(--card);font-size:.8rem;color:var(--muted)}
+.field input{width:100%;box-sizing:border-box;height:58px;border-radius:29px;border:2px solid #3a3a3a;
+  background:transparent;color:var(--text);font-size:1.05rem;padding:0 22px;outline:none}
+.field input:focus{border-color:var(--line)}
+.btn{width:100%;height:58px;border:0;border-radius:29px;background:var(--pill);color:#fff;font-size:1.1rem;font-weight:600;margin-top:6px}
+.btn:focus-visible,.add:focus-visible,.back:focus-visible{outline:3px solid #fff;outline-offset:3px}
+#err{min-height:1.2em;margin:0 0 8px;font-size:.9rem;color:var(--error);text-align:left}
+
+/* Home */
+#home{flex-direction:column;background:var(--sky);padding:16px}
+.back{background:none;border:0;padding:8px;width:44px;height:44px;margin:0 0 4px -8px}
+.add{display:flex;align-items:center;gap:14px;width:100%;border:0;border-radius:36px;background:var(--pill);
+  color:#fff;padding:14px 20px;text-align:left;font:inherit}
+.plus{flex:none;width:40px;height:40px;border-radius:50%;background:#0b4f1a;display:grid;place-items:center}
+.add b{display:block;font-size:1.15rem;font-weight:500;letter-spacing:.02em}
+.add small{display:block;font-size:.95rem;opacity:.9}
+/* Connected bot */
+.botview{display:none}
+#home.has-bot{background:#0b0a1f}
+#home.has-bot .botview{display:block}
+#home.has-bot .back{display:none}
+#home.has-bot .add{border:2px solid #7c5cff;background:#1a1440;box-shadow:0 0 16px #6b4bff66}
+#home.has-bot .plus{background:#6b4bff}
+.title{width:fit-content;max-width:92%;margin:0 auto 14px;text-align:center;font-weight:700;font-size:1.1rem;
+  padding:12px 22px;border-radius:24px;border:2px solid #7c5cff;background:#1a1440;box-shadow:0 0 18px #6b4bff66}
+.cover{aspect-ratio:1;border-radius:30px;border:2px solid #7c5cff;box-shadow:0 0 24px #6b4bff88;overflow:hidden;
+  background:linear-gradient(160deg,#1a1440,#3a1a5c)}
+.cover svg{display:block;width:100%;height:100%}
+.by{text-align:center;color:#c9c3e8;margin:14px 0}
+.acts{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.act{height:80px;border-radius:24px;border:2px solid #7c5cff;background:#1a1440;color:#fff;font:inherit;font-size:.85rem;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;box-shadow:0 0 14px #6b4bff66}
+.act:focus-visible{outline:3px solid #fff;outline-offset:3px}
+.lbl{text-align:center;font-weight:700;font-size:.85rem;margin:20px 0 10px}
+.row{display:flex;align-items:center;gap:14px;border-radius:32px;border:2px solid #7c5cff;background:#1a1440;
+  padding:10px 18px;font-weight:700;margin-bottom:14px}
+.row i{flex:none;width:48px;height:48px;border-radius:50%;background:radial-gradient(circle,#ff5a5a,#3a1a5c)}
+.sheet{position:fixed;inset:0;background:#000a;display:flex;align-items:flex-end;justify-content:center}
+.sheet[hidden]{display:none}
+.panel{width:100%;max-width:480px;box-sizing:border-box;background:var(--card);border-radius:28px 28px 0 0;
+  padding:24px 24px calc(24px + env(safe-area-inset-bottom,0px))}
+.panel h2{margin:0 0 20px;font-size:1.2rem}
+.link{width:100%;height:48px;background:none;border:0;color:var(--muted);font:inherit;margin-top:4px}
+/* Bottom nav, MetaTrader screen, quotes chips */
+#nav{display:none;position:fixed;left:0;right:0;bottom:0;justify-content:space-around;background:#12102b;
+  border-top:1px solid #3a2f7a;padding:8px 0 calc(8px + env(safe-area-inset-bottom,0px))}
+body.in #nav{display:flex}
+#nav button{background:none;border:0;color:#a79fd6;font:inherit;font-size:.75rem;display:flex;flex-direction:column;
+  align-items:center;gap:4px;min-width:96px;height:52px}
+#nav button.on{color:#fff}
+#nav button:focus-visible{outline:3px solid #fff;outline-offset:2px}
+#nav svg{stroke:currentColor}
+body.in #home,body.in #mt{padding-bottom:96px}
+#mt{flex-direction:column;align-items:center;background:#0b0a1f;padding:16px}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:22px}
+.seg button{height:48px;border-radius:24px;border:2px solid #3a3a3a;background:transparent;color:#fff;font:inherit}
+.seg button.on{border-color:#7c5cff;background:#1a1440}
+.hint{margin:0 0 14px;font-size:.85rem;color:var(--muted);text-align:left}
+#mtStatus{min-height:1.2em;margin:14px 0 0;font-size:.9rem;color:#9be7a8}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{height:40px;padding:0 14px;border-radius:20px;border:2px solid #3a3a3a;background:transparent;color:#fff;font:inherit}
+.chip.on{border-color:#7c5cff;background:#1a1440}
+.panel.tall{max-height:82vh;overflow-y:auto}
+/* MetaTrader screen: light, brown (matches the screenshot) */
+#mt{background:#e8e8e8;color:#5a3300}
+.tabs{display:flex;gap:12px;width:100%;max-width:420px;margin:8px 0 26px}
+.tabs button{position:relative;flex:1;height:50px;border:0;border-radius:10px;background:#6b3f00;color:#fff;font:inherit;
+  font-size:.85rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;opacity:.7}
+.tabs button.on{opacity:1}
+.tabs button.on::after{content:"";position:absolute;left:0;bottom:-9px;width:70%;height:3px;background:#6b3f00}
+.tabs button:focus-visible{outline:3px solid #5a3300;outline-offset:3px}
+#mt .card{background:#fff;color:#5a3300;border-radius:8px}
+#mt h2{margin:0 0 24px;text-align:center;font-size:1.45rem;text-transform:uppercase}
+#mt .field span{background:#fff;color:#6f6152}
+#mt .field input{border-color:#c9c2b8;color:#222;border-radius:8px}
+#mt .field input:focus{border-color:#6b3f00}
+#mt .btn{background:#8a4b00;border-radius:8px}
+#mt .hint{color:#6f6152}
+#mt .err{min-height:1.2em;margin:0 0 8px;font-size:.9rem;color:#b3261e;text-align:left}
+#mtStatus{color:#1a7a2e}
+body.light #nav{background:#fff;border-top-color:#e2e2e2}
+body.light #nav button{color:#8a6a3a}
+body.light #nav button.on{color:#6b3f00}
+.asset-tabs{display:flex;gap:8px;margin-bottom:16px}
+.asset-tabs button{flex:1;height:40px;border-radius:20px;border:2px solid #3a3a3a;background:transparent;color:#fff;font:inherit;font-size:.85rem}
+.asset-tabs button.on{border-color:#7c5cff;background:#1a1440}
+.asset-row{border:2px solid #3a3a3a;border-radius:16px;padding:12px 14px;margin-bottom:10px}
+.asset-row.on{border-color:#7c5cff;background:#1a1440}
+.asset-row .top{display:flex;align-items:center;justify-content:space-between}
+.asset-row .top label{display:flex;align-items:center;gap:10px;font-weight:600}
+.asset-row .opts{display:none;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.asset-row.on .opts{display:grid}
+.asset-row .opts label{display:block;font-size:.75rem;color:var(--muted);text-align:left;margin-bottom:4px}
+.asset-row select,.asset-row input{width:100%;box-sizing:border-box;height:40px;border-radius:10px;border:1px solid #3a3a3a;
+  background:transparent;color:#fff;padding:0 10px;font:inherit}
+/* Status panel */
+.status{border:2px solid #7c5cff;border-radius:20px;background:#1a1440;box-shadow:0 0 18px #6b4bff66;padding:6px;margin-top:16px}
+.status .seg2{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:14px}
+.status .seg2 button{height:38px;border-radius:14px;border:0;background:transparent;color:#a79fd6;font:inherit;font-size:.85rem;font-weight:700}
+.status .seg2 button.on{background:#0e0a2e;color:#fff}
+.mode{text-align:center;font-weight:800;letter-spacing:.06em;color:#4ee36b;margin:4px 0 14px}
+.checks{padding:0 10px 12px}
+.chk{display:flex;align-items:center;gap:10px;padding:8px 0;font-size:.9rem}
+.dot{flex:none;width:16px;height:16px;border-radius:50%}
+.dot.yes{background:#4ee36b}
+.dot.no{background:#555}
+#toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);
+  background:#111;color:#fff;padding:12px 18px;border-radius:20px;font-size:.9rem;opacity:0;transition:opacity .2s;pointer-events:none}
+#toast.on{opacity:1}
+</style>
+</head>
+<body>
+
+<main id="login" class="screen on">
+  <div class="card">
+    <div class="logo" aria-hidden="true">
+      <svg width="52" height="52" viewBox="0 0 52 52" fill="none">
+        <rect x="8" y="26" width="8" height="18" rx="2" fill="#1f9d3a"/>
+        <rect x="22" y="16" width="8" height="28" rx="2" fill="#1f9d3a"/>
+        <rect x="36" y="6" width="8" height="38" rx="2" fill="#0b4f1a"/>
+      </svg>
+    </div>
+    <h1>Godfather EA login</h1>
+    <label class="field"><span>Mentor ID</span><input id="mid" autocomplete="username" autocapitalize="characters" spellcheck="false"></label>
+    <label class="field"><span>Email</span><input id="em" type="email" autocomplete="email" inputmode="email"></label>
+    <p id="err" role="alert"></p>
+    <button class="btn" id="go">Proceed</button>
+  </div>
+</main>
+
+<main id="home" class="screen">
+  <button class="back" id="back" aria-label="Back to login">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+  </button>
+  <div class="botview">
+    <div class="title">Sample Bot 1.0</div>
+    <div class="cover" aria-hidden="true">
+      <svg viewBox="0 0 200 200"><g fill="none" stroke="#9b82ff" stroke-width="3"><circle cx="100" cy="100" r="60"/><circle cx="100" cy="100" r="30"/><path d="M100 20v50M100 130v50M20 100h50M130 100h50"/></g><circle cx="100" cy="100" r="6" fill="#ff5a5a"/></svg>
+    </div>
+    <p class="by">~ Sample Trader</p>
+    <div class="acts">
+      <button class="act" id="quotes"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#9b82ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/></svg>Quotes</button>
+      <button class="act" id="trade"><svg width="26" height="26" viewBox="0 0 24 24" fill="#9b82ff"><path d="M7 4l13 8-13 8z"/></svg>Trade</button>
+      <button class="act" id="rm"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#9b82ff" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg><span id="rmT">Remove</span></button>
+    </div>
+    <p class="lbl">Connected robots:</p>
+    <div class="row"><i></i>Sample Bot 1.0</div>
+    <div class="status" id="status" hidden>
+      <div class="seg2">
+        <button data-s="status" class="on">Status</button>
+        <button data-s="mode">Mode</button>
+      </div>
+      <p class="mode" id="modeText">NORMAL</p>
+      <div class="checks">
+        <div class="chk"><span class="dot" id="ckAcct"></span>Connected account</div>
+        <div class="chk"><span class="dot yes"></span>Internet</div>
+        <div class="chk"><span class="dot" id="ckSym"></span><span id="ckSymLabel">Symbols</span></div>
+        <div class="chk"><span class="dot" id="ckActive"></span>Bot active</div>
+      </div>
+    </div>
+  </div>
+  <button class="add" id="add">
+    <span class="plus" aria-hidden="true">
+      <svg width="20" height="20" viewBox="0 0 24 24" stroke="#fff" stroke-width="3" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+    </span>
+    <span><b id="addT">Add a new EA</b><small>Have a valid license key</small></span>
+  </button>
+</main>
+
+<div class="sheet" id="sheet" hidden>
+  <div class="panel">
+    <h2>Enter license key</h2>
+    <label class="field"><span>License key</span><input id="key" autocapitalize="characters" spellcheck="false" autocomplete="off"></label>
+    <p id="kerr" role="alert" style="min-height:1.2em;margin:0 0 8px;font-size:.9rem;color:var(--error)"></p>
+    <button class="btn" id="keyGo">Add key</button>
+    <button class="link" id="keyX">Cancel</button>
+  </div>
+</div>
+
+<main id="mt" class="screen">
+  <div class="tabs" id="tabs" role="group" aria-label="Platform">
+    <button data-p="mt5" class="on">MT5 account</button>
+    <button data-p="mt4">MT4 account</button>
+  </div>
+  <div class="card">
+    <h2 id="mtTitle">MT5 login details</h2>
+    <label class="field"><span>Login</span><input id="mtLogin" inputmode="numeric" autocomplete="off"></label>
+    <label class="field"><span>Password</span><input id="mtPass" type="password" autocomplete="off"></label>
+    <label class="field"><span>Server</span><input id="mtServer" autocomplete="off" autocapitalize="off" spellcheck="false"></label>
+    <p class="hint">Use your trading password, not the investor (read-only) password.</p>
+    <p id="mtErr" class="err" role="alert"></p>
+    <button class="btn" id="mtSave">Save MT5 details</button>
+    <p id="mtStatus"></p>
+  </div>
+</main>
+
+<div class="sheet" id="qsheet" hidden>
+  <div class="panel tall">
+    <h2>Assets</h2>
+    <div class="asset-tabs">
+      <button data-t="allowed" class="on">Allowed symbols</button>
+      <button data-t="all">All symbols</button>
+    </div>
+    <p class="hint" id="qHint">These are symbols you have selected for your EA to trade.</p>
+    <div id="assetList"></div>
+    <button class="btn" id="qSave" style="margin-top:20px">Save assets</button>
+    <button class="link" id="qX">Cancel</button>
+  </div>
+</div>
+
+<nav id="nav" aria-label="Main">
+  <button data-go="home" class="on"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11l8-7 8 7v9H4z"/></svg>Home</button>
+  <button data-go="mt"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg>MetaTrader</button>
+</nav>
+
+<div id="toast" role="status"></div>
+
+<script>
+const $ = s => document.querySelector(s);
+function show(id){
+  document.querySelectorAll('.screen').forEach(e => e.classList.toggle('on', e.id === id));
+  document.body.classList.toggle('in', id !== 'login');
+  document.body.classList.toggle('light', id === 'mt');
+  document.querySelectorAll('#nav button').forEach(b => b.classList.toggle('on', b.dataset.go === id));
+}
+let t;
+function toast(msg){ const el = $('#toast'); el.textContent = msg; el.classList.add('on'); clearTimeout(t); t = setTimeout(() => el.classList.remove('on'), 2200); }
+
+$('#go').onclick = () => {
+  const m = $('#mid').value.trim(), e = $('#em').value.trim();
+  if (!m || !/^\S+@\S+\.\S+$/.test(e)) { $('#err').textContent = 'Enter your Mentor ID and a valid email.'; return; }
+  $('#err').textContent = '';
+  show('home'); // prototype: the real app calls POST /auth/login here
+};
+$('#back').onclick = () => show('login');
+let bot = false, armed = false, botActive = false;
+function render(){
+  $('#home').classList.toggle('has-bot', bot);
+  $('#addT').textContent = bot ? 'Add keys' : 'Add a new EA';
+  $('#trade').textContent = botActive ? 'Stop' : 'Trade';
+}
+$('#add').onclick = () => { $('#sheet').hidden = false; $('#key').focus(); };
+$('#keyX').onclick = () => { $('#sheet').hidden = true; };
+$('#keyGo').onclick = () => {
+  // prototype: the real app calls the key-bind endpoint here
+  if ($('#key').value.trim().length < 8) { $('#kerr').textContent = 'Enter the full license key.'; return; }
+  $('#kerr').textContent = ''; $('#key').value = ''; $('#sheet').hidden = true; bot = true; render();
+};
+
+const ASSET_SYMBOLS = ['EURUSD','GBPUSD','USDJPY','XAUUSD','US30','NAS100','BTCUSD'];
+let saved = {}, draft = {}, atab = 'allowed', mtSaved = {}, plat = 'mt5';
+
+function drawAssets(){
+  const list = atab === 'allowed' ? Object.keys(draft) : ASSET_SYMBOLS;
+  $('#qHint').textContent = atab === 'allowed'
+    ? 'These are symbols you have selected for your EA to trade.'
+    : 'Pick a symbol, then set its lot size and action.';
+  $('#assetList').innerHTML = list.length ? list.map(sym => {
+    const on = !!draft[sym], a = draft[sym] || { lot: 0.01, action: 'BOTH' };
+    return '<div class="asset-row' + (on ? ' on' : '') + '" data-sym="' + sym + '">' +
+      '<div class="top"><label><input type="checkbox" data-chk="' + sym + '"' + (on ? ' checked' : '') + '>' + sym + '</label></div>' +
+      '<div class="opts">' +
+        '<div><label>Lot size</label><input type="number" step="0.01" min="0.01" max="100" data-lot="' + sym + '" value="' + a.lot + '"></div>' +
+        '<div><label>Action</label><select data-act="' + sym + '">' +
+          ['BUY','SELL','BOTH'].map(o => '<option' + (a.action === o ? ' selected' : '') + '>' + o + '</option>').join('') +
+        '</select></div>' +
+      '</div></div>';
+  }).join('') : '<p class="hint">No symbols yet — switch to All symbols to add one.</p>';
+}
+document.querySelectorAll('.asset-tabs button').forEach(b => b.onclick = () => {
+  atab = b.dataset.t;
+  document.querySelectorAll('.asset-tabs button').forEach(x => x.classList.toggle('on', x === b));
+  drawAssets();
+});
+$('#quotes').onclick = () => { draft = { ...saved }; atab = 'allowed'; document.querySelectorAll('.asset-tabs button').forEach(x => x.classList.toggle('on', x.dataset.t === 'allowed')); drawAssets(); $('#qsheet').hidden = false; };
+$('#assetList').addEventListener('change', e => {
+  const sym = e.target.dataset.chk || e.target.dataset.lot || e.target.dataset.act;
+  if (!sym) return;
+  if (e.target.dataset.chk) {
+    if (e.target.checked) draft[sym] = draft[sym] || { lot: 0.01, action: 'BOTH' };
+    else delete draft[sym];
+  } else if (e.target.dataset.lot) {
+    draft[sym] = draft[sym] || { lot: 0.01, action: 'BOTH' }; draft[sym].lot = Number(e.target.value) || 0.01;
+  } else if (e.target.dataset.act) {
+    draft[sym] = draft[sym] || { lot: 0.01, action: 'BOTH' }; draft[sym].action = e.target.value;
+  }
+  drawAssets();
+});
+$('#qX').onclick = () => { $('#qsheet').hidden = true; };
+$('#qSave').onclick = () => {
+  saved = { ...draft }; $('#qsheet').hidden = true;
+  const n = Object.keys(saved).length; toast(n + (n === 1 ? ' symbol saved' : ' symbols saved'));
+};
+
+document.querySelectorAll('.status .seg2 button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('.status .seg2 button').forEach(x => x.classList.toggle('on', x === b));
+  toast(b.dataset.s === 'mode' ? 'Mode settings go here' : 'Status');
+});
+function updateStatus(){
+  const hasAcct = !!mtSaved.mt5, hasSym = Object.keys(saved).length > 0;
+  $('#ckAcct').className = 'dot ' + (hasAcct ? 'yes' : 'no');
+  $('#ckSym').className = 'dot ' + (hasSym ? 'yes' : 'no');
+  $('#ckSymLabel').textContent = hasSym ? Object.keys(saved)[0] : 'Symbols';
+  $('#ckActive').className = 'dot ' + (botActive ? 'yes' : 'no');
+  $('#modeText').textContent = botActive ? 'NORMAL' : 'STOPPED';
+}
+$('#trade').onclick = () => {
+  if (!mtSaved.mt5) return toast('Add your MT5 account first');
+  if (!Object.keys(saved).length) return toast('Choose your assets first');
+  botActive = !botActive; render(); updateStatus();
+  $('#status').hidden = false;
+  toast(botActive ? 'Bot started — looking for entries' : 'Bot stopped');
+};
+$('#rm').onclick = () => {
+  if (!armed) { armed = true; $('#rmT').textContent = 'Tap again'; setTimeout(() => { armed = false; $('#rmT').textContent = 'Remove'; }, 3000); return; }
+  armed = false; $('#rmT').textContent = 'Remove'; bot = false; botActive = false; saved = {}; $('#status').hidden = true; render();
+};
+function renderMt(){
+  const P = plat.toUpperCase(), a = mtSaved[plat];
+  $('#mtTitle').textContent = P + ' login details';
+  $('#mtSave').textContent = 'Save ' + P + ' details';
+  $('#mtLogin').value = a ? a.l : ''; $('#mtServer').value = a ? a.s : ''; $('#mtPass').value = '';
+  $('#mtStatus').textContent = a ? 'Saved: ' + P + ' · ' + a.l : '';
+  $('#mtErr').textContent = '';
+  document.querySelectorAll('#tabs button').forEach(x => x.classList.toggle('on', x.dataset.p === plat));
+}
+document.querySelectorAll('#tabs button').forEach(b => b.onclick = () => { plat = b.dataset.p; renderMt(); });
+$('#mtSave').onclick = () => {
+  const l = $('#mtLogin').value.trim(), s = $('#mtServer').value.trim(), p = $('#mtPass').value;
+  if (!/^\d{4,12}$/.test(l) || !p || s.length < 2) { $('#mtErr').textContent = 'Enter your login (numbers only), password and server.'; return; }
+  mtSaved[plat] = { l, s }; renderMt(); updateStatus(); toast(plat.toUpperCase() + ' account saved'); // prototype: the real app calls PUT /my/mt-account
+};
+document.querySelectorAll('#nav button').forEach(b => b.onclick = () => show(b.dataset.go));
+if ('serviceWorker' in navigator) { window.addEventListener('load', () => navigator.serviceWorker.register('service-worker.js')); }
+</script>
+</body>
+</html>
