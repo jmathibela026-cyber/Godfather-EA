@@ -135,7 +135,9 @@ $('#gateGo').onclick = async () => {
     localStorage.setItem('godfatherAdminToken', token);
     $('#gateErr').textContent = '';
     show('gen'); loadBots();
-  } catch (e) { $('#gateErr').textContent = 'Incorrect token.'; }
+  } catch (e) {
+    $('#gateErr').textContent = e.message === 'Forbidden' ? 'Incorrect token.' : ('Could not reach the server: ' + e.message);
+  }
 };
 if (token) { show('gen'); loadBots(); } // skip the gate if already unlocked on this device
 
