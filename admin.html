@@ -50,6 +50,7 @@ select{appearance:none}
   <h1>Godfather EA admin</h1>
   <p class="sub">Enter the admin token to continue.</p>
   <input id="token" type="password" placeholder="Admin token" style="max-width:340px">
+  <p class="sub" id="preview" style="margin-top:8px"></p>
   <p class="err" id="gateErr"></p>
   <button class="btn" id="gateGo" style="max-width:340px;margin-top:14px">Continue</button>
 </main>
@@ -64,6 +65,7 @@ select{appearance:none}
 
   <label>Expert Advisor</label>
   <select id="botSelect"><option value="">Loading…</option></select>
+  <button class="btn ghost" id="addBotLink" type="button" style="margin-top:8px;height:40px;font-size:.85rem">+ Add a new EA</button>
 
   <label>Subscription plan</label>
   <div class="plans" id="plans">
@@ -83,7 +85,30 @@ select{appearance:none}
   <button class="btn" id="genGo" disabled>Generate Licence Key</button>
 </main>
 
-<!-- Step 2: share the key -->
+<!-- Step 0: add a new bot -->
+<main id="addbot" class="screen">
+  <div class="top"><button id="addbotBack" aria-label="Back">←</button><h1 style="margin:0">Add a new EA</h1></div>
+  <p class="sub">Upload the compiled file so it can be sent to clients as a licensed bot.</p>
+
+  <label>EA name</label>
+  <input id="botName" placeholder="e.g. Blue Sniper Beast 1.0v">
+
+  <label>Author (optional)</label>
+  <input id="botAuthor" placeholder="e.g. Andile Trader's">
+
+  <label>Platform</label>
+  <div class="plans" style="grid-template-columns:1fr 1fr">
+    <button class="plan on" data-plat="mt5" type="button"><b>MT5</b></button>
+    <button class="plan" data-plat="mt4" type="button"><b>MT4</b></button>
+  </div>
+
+  <label>EA file (.ex4 / .ex5)</label>
+  <input id="botFile" type="file" accept=".ex4,.ex5" style="padding:12px 16px;height:auto">
+  <p class="sub" id="fileName" style="margin-top:6px"></p>
+
+  <p class="err" id="botErr"></p>
+  <button class="btn" id="botGo" style="margin-top:20px">Add EA</button>
+</main>
 <main id="share" class="screen">
   <div class="top"><button id="shareBack" aria-label="Back">←</button><h1 style="margin:0">Licence key ready</h1></div>
   <p class="sub" id="shareFor"></p>
@@ -127,6 +152,11 @@ async function loadBots() {
   }
 }
 
+$('#token').addEventListener('input', () => {
+  const t = $('#token').value.trim();
+  $('#preview').textContent = t.length
+    ? `${t.length} characters: starts "${t.slice(0, 4)}", ends "${t.slice(-4)}"` : '';
+});
 $('#gateGo').onclick = async () => {
   token = $('#token').value.trim();
   if (!token) { $('#gateErr').textContent = 'Enter the admin token.'; return; }
@@ -176,6 +206,52 @@ $('#genGo').onclick = async () => {
     $('#clientEmail').value = '';
     show('share');
   } catch (e) { $('#genErr').textContent = e.message; }
+};
+
+$('#addBotLink').onclick = () => { $('#botErr').textContent = ''; show('addbot'); };
+$('#addbotBack').onclick = () => show('gen');
+
+let botPlat = 'mt5';
+document.querySelectorAll('#addbot .plan').forEach(b => b.onclick = () => {
+  botPlat = b.dataset.plat;
+  document.querySelectorAll('#addbot .plan').forEach(x => x.classList.toggle('on', x === b));
+});
+$('#botFile').addEventListener('change', () => {
+  const f = $('#botFile').files[0];
+  $('#fileName').textContent = f ? f.name + ' (' + Math.round(f.size / 1024) + ' KB)' : '';
+});
+
+function readFileAsBase64(file) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(r.result.split(',')[1]);
+    r.onerror = () => reject(new Error('Could not read the file'));
+    r.readAsDataURL(file);
+  });
+}
+
+$('#botGo').onclick = async () => {
+  $('#botErr').textContent = '';
+  const name = $('#botName').value.trim();
+  const file = $('#botFile').files[0];
+  if (!name) { $('#botErr').textContent = 'Enter the EA name.'; return; }
+  if (!file) { $('#botErr').textContent = 'Choose the .ex4 or .ex5 file.'; return; }
+
+  $('#botGo').disabled = true; $('#botGo').textContent = 'Uploading…';
+  try {
+    const fileBase64 = await readFileAsBase64(file);
+    await api('/admin/bots', {
+      method: 'POST',
+      body: JSON.stringify({ name, author: $('#botAuthor').value.trim(), platform: botPlat, fileName: file.name, fileBase64 }),
+    });
+    $('#botName').value = ''; $('#botAuthor').value = ''; $('#botFile').value = ''; $('#fileName').textContent = '';
+    await loadBots();
+    show('gen');
+  } catch (e) {
+    $('#botErr').textContent = e.message;
+  } finally {
+    $('#botGo').disabled = false; $('#botGo').textContent = 'Add EA';
+  }
 };
 
 $('#shareBack').onclick = () => show('gen');
