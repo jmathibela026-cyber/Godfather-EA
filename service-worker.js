@@ -1,7 +1,7 @@
 // Caches the app's own files so it opens fast and the UI loads even with a
 // flaky connection. It does NOT cache API calls to your server — those always
 // go over the network, since bot status and trades must never be stale.
-const CACHE = "godfather-ea-shell-v3";
+const CACHE = "godfather-ea-shell-v4";
 const SHELL = ["./", "./index.html", "./manifest.json", "./icon-192.png", "./icon-512.png"];
 
 self.addEventListener("install", (e) => {
