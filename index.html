@@ -260,6 +260,16 @@ body.light #nav button.on{color:#1e4fd8}
   </div>
 </div>
 
+<div class="sheet" id="stopsheet" hidden>
+  <div class="panel">
+    <h2>Stop the bot</h2>
+    <p class="hint">What should happen to your open trades?</p>
+    <button class="btn" id="stopClose">Close all trades and stop</button>
+    <button class="btn" id="stopLeave" style="margin-top:10px">Stop and leave trades open</button>
+    <button class="link" id="stopX">Cancel</button>
+  </div>
+</div>
+
 <nav id="nav" aria-label="Main">
   <button data-go="home" class="on"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11l8-7 8 7v9H4z"/></svg>Home</button>
   <button data-go="mt"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg>MetaTrader</button>
@@ -332,6 +342,8 @@ function paintBots(list, imgs){
   bot = list.length > 0;
   if (bot) {
     const b = list[0];
+    saved = {}; (b.symbols || []).forEach(x => { saved[x.symbol] = { lot: x.lot, action: x.action }; });
+    botActive = ['starting', 'running', 'stopping'].includes(b.run_status);
     $('#botTitle').textContent = b.name;
     $('#botBy').textContent = b.author ? '~ ' + b.author : '';
     coverUrl = imgs ? imgs[0] : '';
@@ -345,7 +357,8 @@ function paintBots(list, imgs){
       $('#botRows').appendChild(row);
     });
   }
-  render();
+  render(); updateStatus();
+  $('#status').hidden = !(bot && botActive);
 }
 async function loadMt(){
   try { const c = JSON.parse(localStorage.getItem('godfatherMt') || 'null'); if (c) { mtSaved = c; renderMt(); updateStatus(); } } catch (_) {}
@@ -433,9 +446,18 @@ $('#assetList').addEventListener('change', e => {
   drawAssets();
 });
 $('#qX').onclick = () => { $('#qsheet').hidden = true; };
-$('#qSave').onclick = () => {
-  saved = { ...draft }; $('#qsheet').hidden = true;
-  const n = Object.keys(saved).length; toast(n + (n === 1 ? ' symbol saved' : ' symbols saved'));
+$('#qSave').onclick = async () => {
+  if (!myBots.length) return toast('Add a bot first');
+  const list = Object.keys(draft).map(sym => ({ symbol: sym, lot: Number(draft[sym].lot) || 0.01, action: draft[sym].action }));
+  const btn = $('#qSave'); btn.disabled = true; btn.textContent = 'Saving…';
+  try {
+    const r = await authed('/my/bots/' + myBots[0].id + '/symbols', { method: 'PUT', body: JSON.stringify({ symbols: list }) });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) return toast(d.error || 'Could not save');
+    saved = { ...draft }; myBots[0].symbols = list; $('#qsheet').hidden = true; updateStatus();
+    const n = list.length; toast(n + (n === 1 ? ' symbol saved' : ' symbols saved'));
+  } catch (_) { toast('Cannot reach the server'); }
+  finally { btn.disabled = false; btn.textContent = 'Save assets'; }
 };
 
 document.querySelectorAll('.status .seg2 button').forEach(b => b.onclick = () => {
@@ -443,20 +465,38 @@ document.querySelectorAll('.status .seg2 button').forEach(b => b.onclick = () =>
   toast(b.dataset.s === 'mode' ? 'Mode settings go here' : 'Status');
 });
 function updateStatus(){
-  const hasAcct = !!mtSaved.mt5, hasSym = Object.keys(saved).length > 0;
+  const hasAcct = !!mtSaved[(myBots[0] && myBots[0].platform) || 'mt5'], hasSym = Object.keys(saved).length > 0;
   $('#ckAcct').className = 'dot ' + (hasAcct ? 'yes' : 'no');
   $('#ckSym').className = 'dot ' + (hasSym ? 'yes' : 'no');
   $('#ckSymLabel').textContent = hasSym ? Object.keys(saved)[0] : 'Symbols';
   $('#ckActive').className = 'dot ' + (botActive ? 'yes' : 'no');
   $('#modeText').textContent = botActive ? 'NORMAL' : 'STOPPED';
 }
-$('#trade').onclick = () => {
-  if (!mtSaved.mt5) return toast('Add your MT5 account first');
+async function runBot(path, body, okMsg){
+  const btn = $('#trade'); btn.disabled = true;
+  try {
+    const r = await authed('/my/bots/' + myBots[0].id + path, { method: 'POST', body: JSON.stringify(body || {}) });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) { toast(d.error || (d.errors && d.errors[0]) || 'Something went wrong'); return false; }
+    toast(okMsg); return true;
+  } catch (_) { toast('Cannot reach the server'); return false; }
+  finally { btn.disabled = false; }
+}
+$('#trade').onclick = async () => {
+  if (!myBots.length) return;
+  if (botActive) { $('#stopsheet').hidden = false; return; }
+  const p = myBots[0].platform;
+  if (!mtSaved[p]) return toast('Add your ' + p.toUpperCase() + ' account first');
   if (!Object.keys(saved).length) return toast('Choose your assets first');
-  botActive = !botActive; render(); updateStatus();
-  $('#status').hidden = false;
-  toast(botActive ? 'Bot started — looking for entries' : 'Bot stopped');
+  if (await runBot('/start', {}, 'Bot started. It keeps running even if you close the app')) { await loadBots(); }
 };
+async function stopBot(mode){
+  $('#stopsheet').hidden = true;
+  if (await runBot('/stop', { mode }, mode === 'close_all' ? 'Bot stopped, trades closed' : 'Bot stopped, trades left open')) { await loadBots(); }
+}
+$('#stopClose').onclick = () => stopBot('close_all');
+$('#stopLeave').onclick = () => stopBot('leave_open');
+$('#stopX').onclick = () => { $('#stopsheet').hidden = true; };
 $('#rm').onclick = () => {
   if (!armed) { armed = true; $('#rmT').textContent = 'Tap again'; setTimeout(() => { armed = false; $('#rmT').textContent = 'Remove'; }, 3000); return; }
   armed = false; $('#rmT').textContent = 'Remove';
@@ -495,6 +535,7 @@ $('#mtSave').onclick = async () => {
   finally { btn.disabled = false; if (btn.textContent === 'Saving…') btn.textContent = label; }
 };
 document.querySelectorAll('#nav button').forEach(b => b.onclick = () => show(b.dataset.go));
+document.addEventListener('visibilitychange', () => { if (!document.hidden && authToken && !$('#login').classList.contains('on')) loadBots(1); });
 if ('serviceWorker' in navigator) { window.addEventListener('load', () => navigator.serviceWorker.register('service-worker.js')); }
 </script>
 </body>
