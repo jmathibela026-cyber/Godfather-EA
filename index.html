@@ -302,13 +302,10 @@ $('#go').onclick = async () => {
     $('#err').textContent = err instanceof TypeError ? 'Cannot reach the server. Check your connection and try again.' : err.message;
   } finally { btn.disabled = false; btn.textContent = 'Proceed'; }
 };
-// Already signed in? Check the saved session is still valid (deactivated mentors get logged out here).
-if (authToken) {
-  fetch(API + '/my/bots', { headers: { Authorization: 'Bearer ' + authToken } })
-    .then(r => { if (r.ok) { show('home'); loadBots(); } else if (r.status === 401) { localStorage.removeItem('godfatherToken'); authToken = ''; } })
-    .catch(() => {});
-}
-$('#back').onclick = () => { localStorage.removeItem('godfatherToken'); authToken = ''; show('login'); };
+// Already signed in? Open Home straight away (no network needed). The server is only asked in the
+// background, and only a real "not signed in" answer (401) sends the person back to the login screen.
+if (authToken) { show('home'); window.addEventListener('load', () => loadBots()); }
+$('#back').onclick = () => { localStorage.removeItem('godfatherBots'); localStorage.removeItem('godfatherMt'); mtSaved = {}; localStorage.removeItem('godfatherToken'); authToken = ''; show('login'); };
 let bot = false, armed = false, botActive = false;
 function render(){
   $('#home').classList.toggle('has-bot', bot);
@@ -319,7 +316,7 @@ $('#add').onclick = () => { $('#sheet').hidden = false; $('#key').focus(); };
 $('#keyX').onclick = () => { $('#sheet').hidden = true; };
 async function authed(path, opts = {}){
   const r = await fetch(API + path, { ...opts, headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + authToken, ...(opts.headers || {}) } });
-  if (r.status === 401) { localStorage.removeItem('godfatherToken'); authToken = ''; show('login'); throw new Error('Please sign in again.'); }
+  if (r.status === 401) { localStorage.removeItem('godfatherBots'); localStorage.removeItem('godfatherMt'); mtSaved = {}; localStorage.removeItem('godfatherToken'); authToken = ''; show('login'); throw new Error('Please sign in again.'); }
   return r;
 }
 let myBots = [], coverUrl = '';
@@ -330,29 +327,57 @@ async function botImage(id){
     return URL.createObjectURL(await r.blob());
   } catch (_) { return ''; }
 }
-async function loadBots(){
-  try {
-    const r = await authed('/my/bots');
-    if (!r.ok) return;
-    myBots = (await r.json()).bots;
-  } catch (_) { return; }
-  bot = myBots.length > 0;
+function paintBots(list, imgs){
+  myBots = list;
+  bot = list.length > 0;
   if (bot) {
-    const b = myBots[0];
+    const b = list[0];
     $('#botTitle').textContent = b.name;
     $('#botBy').textContent = b.author ? '~ ' + b.author : '';
-    const imgs = await Promise.all(myBots.map(x => x.has_image ? botImage(x.id) : ''));
-    coverUrl = imgs[0];
+    coverUrl = imgs ? imgs[0] : '';
     $('#coverImg').src = coverUrl || ''; $('#coverImg').hidden = !coverUrl; $('#coverSvg').style.display = coverUrl ? 'none' : 'block';
     $('#botRows').innerHTML = '';
-    myBots.forEach((x, i) => {
+    list.forEach((x, i) => {
       const row = document.createElement('div'); row.className = 'row';
-      const dot = document.createElement('i'); if (imgs[i]) dot.style.backgroundImage = 'url(' + imgs[i] + ')'; else dot.style.background = 'radial-gradient(circle,#ff5a5a,#3a1a5c)';
+      const dot = document.createElement('i');
+      if (imgs && imgs[i]) dot.style.backgroundImage = 'url(' + imgs[i] + ')'; else dot.style.background = 'radial-gradient(circle,#ff5a5a,#3a1a5c)';
       row.appendChild(dot); row.appendChild(document.createTextNode(x.name));
       $('#botRows').appendChild(row);
     });
   }
   render();
+}
+async function loadMt(){
+  try { const c = JSON.parse(localStorage.getItem('godfatherMt') || 'null'); if (c) { mtSaved = c; renderMt(); updateStatus(); } } catch (_) {}
+  try {
+    const r = await authed('/my/mt-account');
+    if (!r.ok) return;
+    const { accounts } = await r.json();
+    mtSaved = {};
+    accounts.forEach(a => { mtSaved[a.platform] = { l: a.login, s: a.server }; });
+    try { localStorage.setItem('godfatherMt', JSON.stringify(mtSaved)); } catch (_) {}
+    renderMt(); updateStatus();
+  } catch (_) {}
+}
+async function loadBots(attempt = 0){
+  if (attempt === 0) loadMt();
+  // Show what we had last time immediately, then refresh from the server
+  if (attempt === 0 && !myBots.length) {
+    try { const c = JSON.parse(localStorage.getItem('godfatherBots') || '[]'); if (c.length) paintBots(c, null); } catch (_) {}
+  }
+  let list;
+  try {
+    const r = await authed('/my/bots');
+    if (!r.ok) throw new Error('server ' + r.status);
+    list = (await r.json()).bots;
+  } catch (e) {
+    // Free servers take up to a minute to wake up: try again a few times, keep showing saved data meanwhile
+    if (authToken && attempt < 6) setTimeout(() => loadBots(attempt + 1), 5000);
+    return;
+  }
+  try { localStorage.setItem('godfatherBots', JSON.stringify(list)); } catch (_) {}
+  const imgs = await Promise.all(list.map(x => x.has_image ? botImage(x.id) : ''));
+  paintBots(list, imgs);
 }
 $('#keyGo').onclick = async () => {
   const key = $('#key').value.trim();
@@ -449,15 +474,25 @@ function renderMt(){
   $('#mtTitle').textContent = P + ' login details';
   $('#mtSave').textContent = 'Save ' + P + ' details';
   $('#mtLogin').value = a ? a.l : ''; $('#mtServer').value = a ? a.s : ''; $('#mtPass').value = '';
+  $('#mtPass').placeholder = a ? 'Saved. Re-enter only to change' : '';
   $('#mtStatus').textContent = a ? 'Saved: ' + P + ' · ' + a.l : '';
   $('#mtErr').textContent = '';
   document.querySelectorAll('#tabs button').forEach(x => x.classList.toggle('on', x.dataset.p === plat));
 }
 document.querySelectorAll('#tabs button').forEach(b => b.onclick = () => { plat = b.dataset.p; renderMt(); });
-$('#mtSave').onclick = () => {
-  const l = $('#mtLogin').value.trim(), s = $('#mtServer').value.trim(), p = $('#mtPass').value;
-  if (!/^\d{4,12}$/.test(l) || !p || s.length < 2) { $('#mtErr').textContent = 'Enter your login (numbers only), password and server.'; return; }
-  mtSaved[plat] = { l, s }; renderMt(); updateStatus(); toast(plat.toUpperCase() + ' account saved'); // prototype: the real app calls PUT /my/mt-account
+$('#mtSave').onclick = async () => {
+  const l = $('#mtLogin').value.trim(), sv = $('#mtServer').value.trim(), p = $('#mtPass').value;
+  if (!/^\d{4,12}$/.test(l) || !p || sv.length < 2) { $('#mtErr').textContent = 'Enter your login (numbers only), password and server.'; return; }
+  const btn = $('#mtSave'), label = btn.textContent; btn.disabled = true; btn.textContent = 'Saving…';
+  try {
+    const r = await authed('/my/mt-account', { method: 'PUT', body: JSON.stringify({ platform: plat, login: l, password: p, server: sv }) });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) { $('#mtErr').textContent = d.error || 'Could not save.'; return; }
+    mtSaved[plat] = { l, s: sv };
+    try { localStorage.setItem('godfatherMt', JSON.stringify(mtSaved)); } catch (_) {}
+    renderMt(); updateStatus(); toast(plat.toUpperCase() + ' account saved');
+  } catch (e) { $('#mtErr').textContent = 'Cannot reach the server. Try again.'; }
+  finally { btn.disabled = false; if (btn.textContent === 'Saving…') btn.textContent = label; }
 };
 document.querySelectorAll('#nav button').forEach(b => b.onclick = () => show(b.dataset.go));
 if ('serviceWorker' in navigator) { window.addEventListener('load', () => navigator.serviceWorker.register('service-worker.js')); }
