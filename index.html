@@ -262,24 +262,37 @@ function show(id){
 let t;
 function toast(msg){ const el = $('#toast'); el.textContent = msg; el.classList.add('on'); clearTimeout(t); t = setTimeout(() => el.classList.remove('on'), 2200); }
 
-// Approved mentors: SHA-256 of "MENTORID|email" (ID uppercase, email lowercase).
-const ALLOWED = [
-  "1b66e1369ae7eb49d9f92a60ec7c06a08b4bc241951c2d8367bbd176979e564e" // TEST001 | test@example.com  <- TEMPORARY test entry, delete when real mentors are added
-];
-async function sha256(t){
-  const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(t));
-  return [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, '0')).join('');
+const API = "https://godfather-ea-server.onrender.com";
+let authToken = localStorage.getItem('godfatherToken') || '';
+async function login(m, e){
+  const r = await fetch(API + '/auth/login', {
+    method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ mentorId: m, email: e })
+  });
+  const d = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(d.error || 'Login failed');
+  return d.token;
 }
 $('#go').onclick = async () => {
   const m = $('#mid').value.trim().toUpperCase(), e = $('#em').value.trim().toLowerCase();
   if (!m || !/^\S+@\S+\.\S+$/.test(e)) { $('#err').textContent = 'Enter your Mentor ID and a valid email.'; return; }
-  let ok = false;
-  try { ok = ALLOWED.includes(await sha256(m + '|' + e)); } catch (_) {}
-  if (!ok) { $('#err').textContent = 'Mentor ID and email do not match. Please check and try again.'; return; }
-  $('#err').textContent = '';
-  show('home');
+  const btn = $('#go'); btn.disabled = true; btn.textContent = 'Checking…';
+  try {
+    authToken = await login(m, e);
+    localStorage.setItem('godfatherToken', authToken);
+    $('#err').textContent = '';
+    show('home');
+  } catch (err) {
+    $('#err').textContent = err instanceof TypeError ? 'Cannot reach the server. Check your connection and try again.' : err.message;
+  } finally { btn.disabled = false; btn.textContent = 'Proceed'; }
 };
-$('#back').onclick = () => show('login');
+// Already signed in? Check the saved session is still valid (deactivated mentors get logged out here).
+if (authToken) {
+  fetch(API + '/my/bots', { headers: { Authorization: 'Bearer ' + authToken } })
+    .then(r => { if (r.ok) show('home'); else if (r.status === 401) { localStorage.removeItem('godfatherToken'); authToken = ''; } })
+    .catch(() => {});
+}
+$('#back').onclick = () => { localStorage.removeItem('godfatherToken'); authToken = ''; show('login'); };
 let bot = false, armed = false, botActive = false;
 function render(){
   $('#home').classList.toggle('has-bot', bot);
