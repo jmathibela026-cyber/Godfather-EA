@@ -96,26 +96,27 @@ body.in #home,body.in #mt{padding-bottom:96px}
 .chip{height:40px;padding:0 14px;border-radius:20px;border:2px solid #3a3a3a;background:transparent;color:#fff;font:inherit}
 .chip.on{border-color:#7c5cff;background:#1a1440}
 .panel.tall{max-height:82vh;overflow-y:auto}
-/* MetaTrader screen: light, brown (matches the screenshot) */
-#mt{background:#e8e8e8;color:#5a3300}
+/* MetaTrader screen: light, professional blue */
+#mt{background:#eef3fb;color:#0f2a5c}
 .tabs{display:flex;gap:12px;width:100%;max-width:420px;margin:8px 0 26px}
-.tabs button{position:relative;flex:1;height:50px;border:0;border-radius:10px;background:#6b3f00;color:#fff;font:inherit;
+.tabs button{position:relative;flex:1;height:50px;border:0;border-radius:10px;background:#1e4fd8;color:#fff;font:inherit;
   font-size:.85rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;opacity:.7}
 .tabs button.on{opacity:1}
-.tabs button.on::after{content:"";position:absolute;left:0;bottom:-9px;width:70%;height:3px;background:#6b3f00}
-.tabs button:focus-visible{outline:3px solid #5a3300;outline-offset:3px}
-#mt .card{background:#fff;color:#5a3300;border-radius:8px}
+.tabs button.on::after{content:"";position:absolute;left:0;bottom:-9px;width:70%;height:3px;background:#1e4fd8}
+.tabs button:focus-visible{outline:3px solid #0f2a5c;outline-offset:3px}
+#mt .card{background:#fff;box-shadow:0 4px 18px #1e4fd822;color:#0f2a5c;border-radius:8px}
 #mt h2{margin:0 0 24px;text-align:center;font-size:1.45rem;text-transform:uppercase}
-#mt .field span{background:#fff;color:#6f6152}
-#mt .field input{border-color:#c9c2b8;color:#222;border-radius:8px}
-#mt .field input:focus{border-color:#6b3f00}
-#mt .btn{background:#8a4b00;border-radius:8px}
-#mt .hint{color:#6f6152}
+#mt .field span{background:#fff;color:#5b6b82}
+#mt .field input{border-color:#c5d0e0;color:#222;border-radius:8px}
+#mt .field input:focus{border-color:#1e4fd8}
+#mt .btn{background:#1d4ed8;border-radius:8px;color:#fff}
+#mt .btn:active{background:#1741b5}
+#mt .hint{color:#5b6b82}
 #mt .err{min-height:1.2em;margin:0 0 8px;font-size:.9rem;color:#b3261e;text-align:left}
 #mtStatus{color:#1a7a2e}
-body.light #nav{background:#fff;border-top-color:#e2e2e2}
-body.light #nav button{color:#8a6a3a}
-body.light #nav button.on{color:#6b3f00}
+body.light #nav{background:#fff;border-top-color:#d5deee}
+body.light #nav button{color:#5b6b82}
+body.light #nav button.on{color:#1e4fd8}
 .asset-tabs{display:flex;gap:8px;margin-bottom:16px}
 .asset-tabs button{flex:1;height:40px;border-radius:20px;border:2px solid #3a3a3a;background:transparent;color:#fff;font:inherit;font-size:.85rem}
 .asset-tabs button.on{border-color:#7c5cff;background:#1a1440}
@@ -261,11 +262,22 @@ function show(id){
 let t;
 function toast(msg){ const el = $('#toast'); el.textContent = msg; el.classList.add('on'); clearTimeout(t); t = setTimeout(() => el.classList.remove('on'), 2200); }
 
-$('#go').onclick = () => {
-  const m = $('#mid').value.trim(), e = $('#em').value.trim();
+// Approved mentors: SHA-256 of "MENTORID|email" (ID uppercase, email lowercase).
+const ALLOWED = [
+  "1b66e1369ae7eb49d9f92a60ec7c06a08b4bc241951c2d8367bbd176979e564e" // TEST001 | test@example.com  <- TEMPORARY test entry, delete when real mentors are added
+];
+async function sha256(t){
+  const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(t));
+  return [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, '0')).join('');
+}
+$('#go').onclick = async () => {
+  const m = $('#mid').value.trim().toUpperCase(), e = $('#em').value.trim().toLowerCase();
   if (!m || !/^\S+@\S+\.\S+$/.test(e)) { $('#err').textContent = 'Enter your Mentor ID and a valid email.'; return; }
+  let ok = false;
+  try { ok = ALLOWED.includes(await sha256(m + '|' + e)); } catch (_) {}
+  if (!ok) { $('#err').textContent = 'Mentor ID and email do not match. Please check and try again.'; return; }
   $('#err').textContent = '';
-  show('home'); // prototype: the real app calls POST /auth/login here
+  show('home');
 };
 $('#back').onclick = () => show('login');
 let bot = false, armed = false, botActive = false;
