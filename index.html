@@ -85,7 +85,7 @@ body.in #nav{display:flex}
 #nav button.on{color:#fff}
 #nav button:focus-visible{outline:3px solid #fff;outline-offset:2px}
 #nav svg{stroke:currentColor}
-body.in #home,body.in #mt{padding-bottom:96px}
+body.in #home,body.in #mt,body.in #chart{padding-bottom:96px}
 #mt{flex-direction:column;align-items:center;background:#0b0a1f;padding:16px}
 .seg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:22px}
 .seg button{height:48px;border-radius:24px;border:2px solid #3a3a3a;background:transparent;color:#fff;font:inherit}
@@ -96,27 +96,26 @@ body.in #home,body.in #mt{padding-bottom:96px}
 .chip{height:40px;padding:0 14px;border-radius:20px;border:2px solid #3a3a3a;background:transparent;color:#fff;font:inherit}
 .chip.on{border-color:#7c5cff;background:#1a1440}
 .panel.tall{max-height:82vh;overflow-y:auto}
-/* MetaTrader screen: light, professional blue */
-#mt{background:#eef3fb;color:#0f2a5c}
+/* MetaTrader screen: light, brown (matches the screenshot) */
+#mt{background:#eef2f9;color:#0d2a5c}
 .tabs{display:flex;gap:12px;width:100%;max-width:420px;margin:8px 0 26px}
-.tabs button{position:relative;flex:1;height:50px;border:0;border-radius:10px;background:#1e4fd8;color:#fff;font:inherit;
+.tabs button{position:relative;flex:1;height:50px;border:0;border-radius:10px;background:#0d3fa0;color:#fff;font:inherit;
   font-size:.85rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;opacity:.7}
 .tabs button.on{opacity:1}
-.tabs button.on::after{content:"";position:absolute;left:0;bottom:-9px;width:70%;height:3px;background:#1e4fd8}
-.tabs button:focus-visible{outline:3px solid #0f2a5c;outline-offset:3px}
-#mt .card{background:#fff;box-shadow:0 4px 18px #1e4fd822;color:#0f2a5c;border-radius:8px}
+.tabs button.on::after{content:"";position:absolute;left:0;bottom:-9px;width:70%;height:3px;background:#0d3fa0}
+.tabs button:focus-visible{outline:3px solid #0d2a5c;outline-offset:3px}
+#mt .card{background:#fff;color:#0d2a5c;border-radius:8px}
 #mt h2{margin:0 0 24px;text-align:center;font-size:1.45rem;text-transform:uppercase}
-#mt .field span{background:#fff;color:#5b6b82}
-#mt .field input{border-color:#c5d0e0;color:#222;border-radius:8px}
-#mt .field input:focus{border-color:#1e4fd8}
-#mt .btn{background:#1d4ed8;border-radius:8px;color:#fff}
-#mt .btn:active{background:#1741b5}
-#mt .hint{color:#5b6b82}
+#mt .field span{background:#fff;color:#5a6b8c}
+#mt .field input{border-color:#c3cfe6;color:#15223d;border-radius:8px}
+#mt .field input:focus{border-color:#0d3fa0}
+#mt .btn{background:#0d3fa0;border-radius:8px}
+#mt .hint{color:#5a6b8c}
 #mt .err{min-height:1.2em;margin:0 0 8px;font-size:.9rem;color:#b3261e;text-align:left}
 #mtStatus{color:#1a7a2e}
-body.light #nav{background:#fff;border-top-color:#d5deee}
-body.light #nav button{color:#5b6b82}
-body.light #nav button.on{color:#1e4fd8}
+body.light #nav{background:#fff;border-top-color:#dde4f2}
+body.light #nav button{color:#5a76b0}
+body.light #nav button.on{color:#0d3fa0}
 .asset-tabs{display:flex;gap:8px;margin-bottom:16px}
 .asset-tabs button{flex:1;height:40px;border-radius:20px;border:2px solid #3a3a3a;background:transparent;color:#fff;font:inherit;font-size:.85rem}
 .asset-tabs button.on{border-color:#7c5cff;background:#1a1440}
@@ -140,24 +139,23 @@ body.light #nav button.on{color:#1e4fd8}
 .dot{flex:none;width:16px;height:16px;border-radius:50%}
 .dot.yes{background:#4ee36b}
 .dot.no{background:#555}
+/* Chart analysis */
+#chart{background:#0e0d24;align-items:center;padding:20px}
+.chart-card{width:100%;max-width:480px}
+.upload-box{border:2px dashed #3a3a3a;border-radius:20px;padding:28px 16px;text-align:center;margin-bottom:16px}
+.upload-box img{max-width:100%;max-height:220px;border-radius:12px;display:block;margin:0 auto 14px}
+.upload-box label{display:inline-block;background:#1a1440;border:2px solid #7c5cff;color:#fff;border-radius:20px;
+  padding:10px 20px;font-size:.9rem;cursor:pointer}
+.upload-box input[type=file]{display:none}
+.upload-box p{color:var(--muted);font-size:.85rem;margin:10px 0 0}
+.analysis{white-space:pre-wrap;line-height:1.5;background:#17122e;border:1px solid #3a2f7a;border-radius:16px;
+  padding:18px;margin-top:16px;font-size:.92rem}
+.spinner{width:28px;height:28px;border:3px solid #3a2f7a;border-top-color:#7c5cff;border-radius:50%;
+  margin:14px auto;animation:spin 0.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 #toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);
   background:#111;color:#fff;padding:12px 18px;border-radius:20px;font-size:.9rem;opacity:0;transition:opacity .2s;pointer-events:none}
 #toast.on{opacity:1}
-
-/* Home: bot look */
-#home.has-bot{background:radial-gradient(120% 60% at 50% 0%,#1c1650 0%,#0b0a1f 65%)}
-.title{text-transform:uppercase;letter-spacing:.04em;background:linear-gradient(180deg,#241a5e,#1a1440);box-shadow:0 0 22px #6b4bffaa,inset 0 0 12px #6b4bff44}
-.cover{position:relative;border-radius:34px;box-shadow:0 0 34px #6b4bffaa,inset 0 0 22px #9b82ff55}
-.cover img{display:block;width:100%;height:100%;object-fit:cover}
-.cover img[hidden]{display:none}
-.by{font-size:1.05rem}
-.act{height:88px;font-weight:600;background:linear-gradient(180deg,#241a5e,#170f3d);box-shadow:0 0 18px #6b4bffaa,inset 0 0 10px #6b4bff44}
-.act:active{transform:scale(.97)}
-.lbl{text-transform:uppercase;letter-spacing:.06em}
-.row{background:linear-gradient(180deg,#241a5e,#170f3d);box-shadow:0 0 18px #6b4bff88,inset 0 0 10px #6b4bff33;text-transform:uppercase;letter-spacing:.02em}
-.row i{background-size:cover;background-position:center;border:2px solid #7c5cff}
-#home.has-bot .add{background:linear-gradient(180deg,#241a5e,#170f3d);text-transform:uppercase}
-#home.has-bot .add small{text-transform:none}
 </style>
 </head>
 <body>
@@ -184,19 +182,18 @@ body.light #nav button.on{color:#1e4fd8}
     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
   </button>
   <div class="botview">
-    <div class="title" id="botTitle"></div>
-    <div class="cover" id="cover">
-      <img id="coverImg" alt="" hidden>
-      <svg id="coverSvg" aria-hidden="true" viewBox="0 0 200 200"><g fill="none" stroke="#9b82ff" stroke-width="3"><circle cx="100" cy="100" r="60"/><circle cx="100" cy="100" r="30"/><path d="M100 20v50M100 130v50M20 100h50M130 100h50"/></g><circle cx="100" cy="100" r="6" fill="#ff5a5a"/></svg>
+    <div class="title">Sample Bot 1.0</div>
+    <div class="cover" aria-hidden="true">
+      <svg viewBox="0 0 200 200"><g fill="none" stroke="#9b82ff" stroke-width="3"><circle cx="100" cy="100" r="60"/><circle cx="100" cy="100" r="30"/><path d="M100 20v50M100 130v50M20 100h50M130 100h50"/></g><circle cx="100" cy="100" r="6" fill="#ff5a5a"/></svg>
     </div>
-    <p class="by" id="botBy"></p>
+    <p class="by">~ Sample Trader</p>
     <div class="acts">
-      <button class="act" id="quotes"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#9b82ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18l5-5 4 4 7-8"/><path d="M17 3v4M15 5h4M6 5v2M5 6h2"/></svg>Quotes</button>
+      <button class="act" id="quotes"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#9b82ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/></svg>Quotes</button>
       <button class="act" id="trade"><svg width="26" height="26" viewBox="0 0 24 24" fill="#9b82ff"><path d="M7 4l13 8-13 8z"/></svg>Trade</button>
-      <button class="act" id="rm"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#9b82ff" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11l4 5M14 11l-4 5"/></svg><span id="rmT">Remove</span></button>
+      <button class="act" id="rm"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#9b82ff" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg><span id="rmT">Remove</span></button>
     </div>
     <p class="lbl">Connected robots:</p>
-    <div id="botRows"></div>
+    <div class="row"><i></i>Sample Bot 1.0</div>
     <div class="status" id="status" hidden>
       <div class="seg2">
         <button data-s="status" class="on">Status</button>
@@ -260,19 +257,26 @@ body.light #nav button.on{color:#1e4fd8}
   </div>
 </div>
 
-<div class="sheet" id="stopsheet" hidden>
-  <div class="panel">
-    <h2>Stop the bot</h2>
-    <p class="hint">What should happen to your open trades?</p>
-    <button class="btn" id="stopClose">Close all trades and stop</button>
-    <button class="btn" id="stopLeave" style="margin-top:10px">Stop and leave trades open</button>
-    <button class="link" id="stopX">Cancel</button>
+<main id="chart" class="screen">
+  <div class="chart-card">
+    <div class="title" style="margin:0 0 18px">Chart analysis</div>
+    <div class="upload-box" id="uploadBox">
+      <img id="chartPreview" hidden>
+      <label for="chartFile">Choose a screenshot</label>
+      <input type="file" id="chartFile" accept="image/png,image/jpeg,image/webp" capture="environment">
+      <p>PNG, JPEG, or WEBP — up to 5MB</p>
+    </div>
+    <button class="btn" id="chartGo" disabled>Analyze chart</button>
+    <p id="chartErr" role="alert" style="min-height:1.2em;margin:10px 0 0;font-size:.9rem;color:var(--error)"></p>
+    <div id="chartLoading" hidden><div class="spinner"></div><p style="text-align:center;color:var(--muted)">Reading the chart…</p></div>
+    <div class="analysis" id="chartResult" hidden></div>
   </div>
-</div>
+</main>
 
 <nav id="nav" aria-label="Main">
   <button data-go="home" class="on"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11l8-7 8 7v9H4z"/></svg>Home</button>
   <button data-go="mt"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg>MetaTrader</button>
+  <button data-go="chart"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8M15 7h6v6"/></svg>Chart</button>
 </nav>
 
 <div id="toast" role="status"></div>
@@ -288,34 +292,32 @@ function show(id){
 let t;
 function toast(msg){ const el = $('#toast'); el.textContent = msg; el.classList.add('on'); clearTimeout(t); t = setTimeout(() => el.classList.remove('on'), 2200); }
 
-const API = "https://godfather-ea-server.onrender.com";
-let authToken = localStorage.getItem('godfatherToken') || '';
-async function login(m, e){
-  const r = await fetch(API + '/auth/login', {
-    method: 'POST', headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({ mentorId: m, email: e })
-  });
-  const d = await r.json().catch(() => ({}));
-  if (!r.ok) throw new Error(d.error || 'Login failed');
-  return d.token;
-}
+const API = "https://godfather-ea-server.onrender.com"; // your Render server
+let sessionToken = localStorage.getItem('godfatherToken') || '';
+
 $('#go').onclick = async () => {
-  const m = $('#mid').value.trim().toUpperCase(), e = $('#em').value.trim().toLowerCase();
+  const m = $('#mid').value.trim(), e = $('#em').value.trim();
   if (!m || !/^\S+@\S+\.\S+$/.test(e)) { $('#err').textContent = 'Enter your Mentor ID and a valid email.'; return; }
-  const btn = $('#go'); btn.disabled = true; btn.textContent = 'Checking…';
+  $('#err').textContent = '';
+  $('#go').disabled = true; $('#go').textContent = 'Checking…';
   try {
-    authToken = await login(m, e);
-    localStorage.setItem('godfatherToken', authToken);
-    $('#err').textContent = '';
-    show('home'); loadBots();
+    const res = await fetch(API + '/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mentorId: m, email: e }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) { $('#err').textContent = data.error || 'Could not log in.'; return; }
+    sessionToken = data.token;
+    localStorage.setItem('godfatherToken', sessionToken);
+    show('home');
   } catch (err) {
-    $('#err').textContent = err instanceof TypeError ? 'Cannot reach the server. Check your connection and try again.' : err.message;
-  } finally { btn.disabled = false; btn.textContent = 'Proceed'; }
+    $('#err').textContent = 'Could not reach the server. Check your connection and try again.';
+  } finally {
+    $('#go').disabled = false; $('#go').textContent = 'Proceed';
+  }
 };
-// Already signed in? Open Home straight away (no network needed). The server is only asked in the
-// background, and only a real "not signed in" answer (401) sends the person back to the login screen.
-if (authToken) { show('home'); window.addEventListener('load', () => loadBots()); }
-$('#back').onclick = () => { localStorage.removeItem('godfatherBots'); localStorage.removeItem('godfatherMt'); mtSaved = {}; localStorage.removeItem('godfatherToken'); authToken = ''; show('login'); };
+$('#back').onclick = () => { localStorage.removeItem('godfatherToken'); sessionToken = ''; show('login'); };
 let bot = false, armed = false, botActive = false;
 function render(){
   $('#home').classList.toggle('has-bot', bot);
@@ -324,86 +326,10 @@ function render(){
 }
 $('#add').onclick = () => { $('#sheet').hidden = false; $('#key').focus(); };
 $('#keyX').onclick = () => { $('#sheet').hidden = true; };
-async function authed(path, opts = {}){
-  const r = await fetch(API + path, { ...opts, headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + authToken, ...(opts.headers || {}) } });
-  if (r.status === 401) { localStorage.removeItem('godfatherBots'); localStorage.removeItem('godfatherMt'); mtSaved = {}; localStorage.removeItem('godfatherToken'); authToken = ''; show('login'); throw new Error('Please sign in again.'); }
-  return r;
-}
-let myBots = [], coverUrl = '';
-async function botImage(id){
-  try {
-    const r = await authed('/my/bots/' + id + '/image');
-    if (!r.ok) return '';
-    return URL.createObjectURL(await r.blob());
-  } catch (_) { return ''; }
-}
-function paintBots(list, imgs){
-  myBots = list;
-  bot = list.length > 0;
-  if (bot) {
-    const b = list[0];
-    saved = {}; (b.symbols || []).forEach(x => { saved[x.symbol] = { lot: x.lot, action: x.action }; });
-    botActive = ['starting', 'running', 'stopping'].includes(b.run_status);
-    $('#botTitle').textContent = b.name;
-    $('#botBy').textContent = b.author ? '~ ' + b.author : '';
-    coverUrl = imgs ? imgs[0] : '';
-    $('#coverImg').src = coverUrl || ''; $('#coverImg').hidden = !coverUrl; $('#coverSvg').style.display = coverUrl ? 'none' : 'block';
-    $('#botRows').innerHTML = '';
-    list.forEach((x, i) => {
-      const row = document.createElement('div'); row.className = 'row';
-      const dot = document.createElement('i');
-      if (imgs && imgs[i]) dot.style.backgroundImage = 'url(' + imgs[i] + ')'; else dot.style.background = 'radial-gradient(circle,#ff5a5a,#3a1a5c)';
-      row.appendChild(dot); row.appendChild(document.createTextNode(x.name));
-      $('#botRows').appendChild(row);
-    });
-  }
-  render(); updateStatus();
-  $('#status').hidden = !(bot && botActive);
-}
-async function loadMt(){
-  try { const c = JSON.parse(localStorage.getItem('godfatherMt') || 'null'); if (c) { mtSaved = c; renderMt(); updateStatus(); } } catch (_) {}
-  try {
-    const r = await authed('/my/mt-account');
-    if (!r.ok) return;
-    const { accounts } = await r.json();
-    mtSaved = {};
-    accounts.forEach(a => { mtSaved[a.platform] = { l: a.login, s: a.server }; });
-    try { localStorage.setItem('godfatherMt', JSON.stringify(mtSaved)); } catch (_) {}
-    renderMt(); updateStatus();
-  } catch (_) {}
-}
-async function loadBots(attempt = 0){
-  if (attempt === 0) loadMt();
-  // Show what we had last time immediately, then refresh from the server
-  if (attempt === 0 && !myBots.length) {
-    try { const c = JSON.parse(localStorage.getItem('godfatherBots') || '[]'); if (c.length) paintBots(c, null); } catch (_) {}
-  }
-  let list;
-  try {
-    const r = await authed('/my/bots');
-    if (!r.ok) throw new Error('server ' + r.status);
-    list = (await r.json()).bots;
-  } catch (e) {
-    // Free servers take up to a minute to wake up: try again a few times, keep showing saved data meanwhile
-    if (authToken && attempt < 6) setTimeout(() => loadBots(attempt + 1), 5000);
-    return;
-  }
-  try { localStorage.setItem('godfatherBots', JSON.stringify(list)); } catch (_) {}
-  const imgs = await Promise.all(list.map(x => x.has_image ? botImage(x.id) : ''));
-  paintBots(list, imgs);
-}
-$('#keyGo').onclick = async () => {
-  const key = $('#key').value.trim();
-  if (key.length < 8) { $('#kerr').textContent = 'Enter the full license key.'; return; }
-  const btn = $('#keyGo'); btn.disabled = true; btn.textContent = 'Checking…';
-  try {
-    const r = await authed('/keys/redeem', { method: 'POST', body: JSON.stringify({ key }) });
-    const d = await r.json().catch(() => ({}));
-    if (!r.ok) { $('#kerr').textContent = d.error || 'Could not add the key.'; return; }
-    $('#kerr').textContent = ''; $('#key').value = ''; $('#sheet').hidden = true;
-    await loadBots();
-  } catch (e) { $('#kerr').textContent = 'Cannot reach the server. Try again.'; }
-  finally { btn.disabled = false; btn.textContent = 'Add key'; }
+$('#keyGo').onclick = () => {
+  // prototype: the real app calls the key-bind endpoint here
+  if ($('#key').value.trim().length < 8) { $('#kerr').textContent = 'Enter the full license key.'; return; }
+  $('#kerr').textContent = ''; $('#key').value = ''; $('#sheet').hidden = true; bot = true; render();
 };
 
 const ASSET_SYMBOLS = ['EURUSD','GBPUSD','USDJPY','XAUUSD','US30','NAS100','BTCUSD'];
@@ -446,18 +372,9 @@ $('#assetList').addEventListener('change', e => {
   drawAssets();
 });
 $('#qX').onclick = () => { $('#qsheet').hidden = true; };
-$('#qSave').onclick = async () => {
-  if (!myBots.length) return toast('Add a bot first');
-  const list = Object.keys(draft).map(sym => ({ symbol: sym, lot: Number(draft[sym].lot) || 0.01, action: draft[sym].action }));
-  const btn = $('#qSave'); btn.disabled = true; btn.textContent = 'Saving…';
-  try {
-    const r = await authed('/my/bots/' + myBots[0].id + '/symbols', { method: 'PUT', body: JSON.stringify({ symbols: list }) });
-    const d = await r.json().catch(() => ({}));
-    if (!r.ok) return toast(d.error || 'Could not save');
-    saved = { ...draft }; myBots[0].symbols = list; $('#qsheet').hidden = true; updateStatus();
-    const n = list.length; toast(n + (n === 1 ? ' symbol saved' : ' symbols saved'));
-  } catch (_) { toast('Cannot reach the server'); }
-  finally { btn.disabled = false; btn.textContent = 'Save assets'; }
+$('#qSave').onclick = () => {
+  saved = { ...draft }; $('#qsheet').hidden = true;
+  const n = Object.keys(saved).length; toast(n + (n === 1 ? ' symbol saved' : ' symbols saved'));
 };
 
 document.querySelectorAll('.status .seg2 button').forEach(b => b.onclick = () => {
@@ -465,77 +382,76 @@ document.querySelectorAll('.status .seg2 button').forEach(b => b.onclick = () =>
   toast(b.dataset.s === 'mode' ? 'Mode settings go here' : 'Status');
 });
 function updateStatus(){
-  const hasAcct = !!mtSaved[(myBots[0] && myBots[0].platform) || 'mt5'], hasSym = Object.keys(saved).length > 0;
+  const hasAcct = !!mtSaved.mt5, hasSym = Object.keys(saved).length > 0;
   $('#ckAcct').className = 'dot ' + (hasAcct ? 'yes' : 'no');
   $('#ckSym').className = 'dot ' + (hasSym ? 'yes' : 'no');
   $('#ckSymLabel').textContent = hasSym ? Object.keys(saved)[0] : 'Symbols';
   $('#ckActive').className = 'dot ' + (botActive ? 'yes' : 'no');
   $('#modeText').textContent = botActive ? 'NORMAL' : 'STOPPED';
 }
-async function runBot(path, body, okMsg){
-  const btn = $('#trade'); btn.disabled = true;
-  try {
-    const r = await authed('/my/bots/' + myBots[0].id + path, { method: 'POST', body: JSON.stringify(body || {}) });
-    const d = await r.json().catch(() => ({}));
-    if (!r.ok) { toast(d.error || (d.errors && d.errors[0]) || 'Something went wrong'); return false; }
-    toast(okMsg); return true;
-  } catch (_) { toast('Cannot reach the server'); return false; }
-  finally { btn.disabled = false; }
-}
-$('#trade').onclick = async () => {
-  if (!myBots.length) return;
-  if (botActive) { $('#stopsheet').hidden = false; return; }
-  const p = myBots[0].platform;
-  if (!mtSaved[p]) return toast('Add your ' + p.toUpperCase() + ' account first');
+$('#trade').onclick = () => {
+  if (!mtSaved.mt5) return toast('Add your MT5 account first');
   if (!Object.keys(saved).length) return toast('Choose your assets first');
-  if (await runBot('/start', {}, 'Bot started. It keeps running even if you close the app')) { await loadBots(); }
+  botActive = !botActive; render(); updateStatus();
+  $('#status').hidden = false;
+  toast(botActive ? 'Bot started — looking for entries' : 'Bot stopped');
 };
-async function stopBot(mode){
-  $('#stopsheet').hidden = true;
-  if (await runBot('/stop', { mode }, mode === 'close_all' ? 'Bot stopped, trades closed' : 'Bot stopped, trades left open')) { await loadBots(); }
-}
-$('#stopClose').onclick = () => stopBot('close_all');
-$('#stopLeave').onclick = () => stopBot('leave_open');
-$('#stopX').onclick = () => { $('#stopsheet').hidden = true; };
 $('#rm').onclick = () => {
   if (!armed) { armed = true; $('#rmT').textContent = 'Tap again'; setTimeout(() => { armed = false; $('#rmT').textContent = 'Remove'; }, 3000); return; }
-  armed = false; $('#rmT').textContent = 'Remove';
-  (async () => {
-    try {
-      const r = await authed('/my/bots/' + myBots[0].id, { method: 'DELETE' });
-      const d = await r.json().catch(() => ({}));
-      if (!r.ok) return toast(d.error || 'Could not remove');
-      botActive = false; saved = {}; $('#status').hidden = true; await loadBots();
-    } catch (_) { toast('Cannot reach the server'); }
-  })();
+  armed = false; $('#rmT').textContent = 'Remove'; bot = false; botActive = false; saved = {}; $('#status').hidden = true; render();
 };
 function renderMt(){
   const P = plat.toUpperCase(), a = mtSaved[plat];
   $('#mtTitle').textContent = P + ' login details';
   $('#mtSave').textContent = 'Save ' + P + ' details';
   $('#mtLogin').value = a ? a.l : ''; $('#mtServer').value = a ? a.s : ''; $('#mtPass').value = '';
-  $('#mtPass').placeholder = a ? 'Saved. Re-enter only to change' : '';
   $('#mtStatus').textContent = a ? 'Saved: ' + P + ' · ' + a.l : '';
   $('#mtErr').textContent = '';
   document.querySelectorAll('#tabs button').forEach(x => x.classList.toggle('on', x.dataset.p === plat));
 }
 document.querySelectorAll('#tabs button').forEach(b => b.onclick = () => { plat = b.dataset.p; renderMt(); });
-$('#mtSave').onclick = async () => {
-  const l = $('#mtLogin').value.trim(), sv = $('#mtServer').value.trim(), p = $('#mtPass').value;
-  if (!/^\d{4,12}$/.test(l) || !p || sv.length < 2) { $('#mtErr').textContent = 'Enter your login (numbers only), password and server.'; return; }
-  const btn = $('#mtSave'), label = btn.textContent; btn.disabled = true; btn.textContent = 'Saving…';
-  try {
-    const r = await authed('/my/mt-account', { method: 'PUT', body: JSON.stringify({ platform: plat, login: l, password: p, server: sv }) });
-    const d = await r.json().catch(() => ({}));
-    if (!r.ok) { $('#mtErr').textContent = d.error || 'Could not save.'; return; }
-    mtSaved[plat] = { l, s: sv };
-    try { localStorage.setItem('godfatherMt', JSON.stringify(mtSaved)); } catch (_) {}
-    renderMt(); updateStatus(); toast(plat.toUpperCase() + ' account saved');
-  } catch (e) { $('#mtErr').textContent = 'Cannot reach the server. Try again.'; }
-  finally { btn.disabled = false; if (btn.textContent === 'Saving…') btn.textContent = label; }
+$('#mtSave').onclick = () => {
+  const l = $('#mtLogin').value.trim(), s = $('#mtServer').value.trim(), p = $('#mtPass').value;
+  if (!/^\d{4,12}$/.test(l) || !p || s.length < 2) { $('#mtErr').textContent = 'Enter your login (numbers only), password and server.'; return; }
+  mtSaved[plat] = { l, s }; renderMt(); updateStatus(); toast(plat.toUpperCase() + ' account saved'); // prototype: the real app calls PUT /my/mt-account
 };
 document.querySelectorAll('#nav button').forEach(b => b.onclick = () => show(b.dataset.go));
-document.addEventListener('visibilitychange', () => { if (!document.hidden && authToken && !$('#login').classList.contains('on')) loadBots(1); });
+
+let chartFileData = null; // { base64, mediaType }
+$('#chartFile').addEventListener('change', () => {
+  const f = $('#chartFile').files[0];
+  $('#chartErr').textContent = ''; $('#chartResult').hidden = true;
+  if (!f) return;
+  if (f.size > 5 * 1024 * 1024) { $('#chartErr').textContent = 'Image is too large (max 5MB).'; $('#chartGo').disabled = true; return; }
+  const reader = new FileReader();
+  reader.onload = () => {
+    chartFileData = { base64: reader.result.split(',')[1], mediaType: f.type };
+    $('#chartPreview').src = reader.result; $('#chartPreview').hidden = false;
+    $('#chartGo').disabled = false;
+  };
+  reader.readAsDataURL(f);
+});
+
+$('#chartGo').onclick = async () => {
+  if (!chartFileData) return;
+  $('#chartErr').textContent = ''; $('#chartResult').hidden = true;
+  $('#chartGo').disabled = true; $('#chartLoading').hidden = false;
+  try {
+    const res = await fetch(API + '/analyze-chart', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + sessionToken },
+      body: JSON.stringify({ imageBase64: chartFileData.base64, mediaType: chartFileData.mediaType }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) { $('#chartErr').textContent = data.error || 'Could not analyze the chart.'; return; }
+    $('#chartResult').textContent = data.analysis; $('#chartResult').hidden = false;
+  } catch (e) {
+    $('#chartErr').textContent = 'Could not reach the server. Check your connection and try again.';
+  } finally {
+    $('#chartLoading').hidden = true; $('#chartGo').disabled = false;
+  }
+};
+if (sessionToken) show('home'); // stay logged in between visits
 if ('serviceWorker' in navigator) { window.addEventListener('load', () => navigator.serviceWorker.register('service-worker.js')); }
 </script>
 </body>
