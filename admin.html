@@ -47,6 +47,14 @@ select{appearance:none}
 .tog.on{background:var(--green)}
 .tog.off{background:#6b2b2b}
 .mrow.dis .em{opacity:.55}
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:8px}
+.stat{border:1px solid var(--line);border-radius:12px;background:var(--card);padding:10px;text-align:center}
+.stat b{display:block;font-size:1.3rem}
+.stat small{color:var(--muted);font-size:.75rem}
+.stat.g b{color:var(--green)} .stat.r b{color:#e07070}
+.chips{display:flex;gap:8px;margin-top:10px}
+.chip{flex:1;height:38px;border-radius:19px;border:1px solid var(--line);background:transparent;color:var(--muted);font:inherit;font-size:.85rem}
+.chip.on{background:var(--blue);border-color:var(--blue);color:#fff}
 .gate{align-items:center;justify-content:center;text-align:center}
 </style>
 </head>
@@ -90,13 +98,13 @@ select{appearance:none}
 
   <p class="err" id="genErr"></p>
   <button class="btn" id="genGo" disabled>Generate Licence Key</button>
-  <button class="btn ghost" id="toMentors" type="button">Manage mentors</button>
+  <button class="btn ghost" id="toMentors" type="button">Manage emails</button>
 </main>
 
 <!-- Mentors: create Mentor IDs, activate / deactivate -->
 <main id="mentors" class="screen">
-  <div class="top"><button id="mentorsBack" aria-label="Back">←</button><h1 style="margin:0">Mentors</h1></div>
-  <p class="sub">Create a Mentor ID for an email, and turn access on or off.</p>
+  <div class="top"><button id="mentorsBack" aria-label="Back">←</button><h1 style="margin:0">Emails</h1></div>
+  <p class="sub">See every email, create a Mentor ID for a new one, and turn access on or off.</p>
 
   <label>Mentor email</label>
   <input id="mEmail" type="email" placeholder="mentor@email.com" autocapitalize="off">
@@ -107,7 +115,18 @@ select{appearance:none}
   <p class="sub" id="mNewNote" style="display:none;margin:-8px 0 8px">Copy this now. It is shown only once and cannot be looked up later.</p>
   <button class="btn ghost" id="mCopy" style="display:none;flex:none">Copy Mentor ID</button>
 
-  <label style="margin-top:26px">All mentors</label>
+  <label style="margin-top:26px">All emails</label>
+  <div class="stats">
+    <div class="stat"><b id="cAll">0</b><small>Total</small></div>
+    <div class="stat g"><b id="cOn">0</b><small>Active</small></div>
+    <div class="stat r"><b id="cOff">0</b><small>Deactivated</small></div>
+  </div>
+  <input id="mSearch" type="search" placeholder="Search emails" autocapitalize="off" style="margin-top:10px">
+  <div class="chips" id="mFilter">
+    <button class="chip on" data-f="all" type="button">All</button>
+    <button class="chip" data-f="active" type="button">Active</button>
+    <button class="chip" data-f="off" type="button">Deactivated</button>
+  </div>
   <div id="mList"></div>
 </main>
 
@@ -333,17 +352,33 @@ $('#mailBtn').onclick = () => {
 
 // ---------- Mentors ----------
 const esc = v => String(v).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-async function loadMentors() {
+let allUsers = [], mFilter = 'all';
+function renderMentors() {
   const box = $('#mList');
-  try {
-    const { users } = await api('/admin/users');
-    box.innerHTML = users.length ? users.map(u => `
-      <div class="mrow ${u.active ? '' : 'dis'}">
-        <div class="em">${esc(u.email)}<small>${u.active ? 'Active' : 'Deactivated'} · added ${new Date(u.created_at).toLocaleDateString()}</small></div>
-        <button class="tog ${u.active ? 'on' : 'off'}" data-id="${u.id}" data-active="${u.active}">${u.active ? 'Active' : 'Off'}</button>
-      </div>`).join('') : '<p class="sub">No mentors yet.</p>';
-  } catch (e) { box.innerHTML = '<p class="err">' + esc(e.message) + '</p>'; }
+  const on = allUsers.filter(u => u.active).length;
+  $('#cAll').textContent = allUsers.length; $('#cOn').textContent = on; $('#cOff').textContent = allUsers.length - on;
+  const q = $('#mSearch').value.trim().toLowerCase();
+  const list = allUsers.filter(u =>
+    (mFilter === 'all' || (mFilter === 'active') === !!u.active) && u.email.toLowerCase().includes(q));
+  box.innerHTML = list.length ? list.map(u => `
+    <div class="mrow ${u.active ? '' : 'dis'}">
+      <div class="em">${esc(u.email)}<small>${u.active ? 'Active' : 'Deactivated'} · added ${new Date(u.created_at).toLocaleDateString()}</small></div>
+      <button class="tog ${u.active ? 'on' : 'off'}" data-id="${u.id}" data-active="${u.active}">${u.active ? 'Active' : 'Off'}</button>
+    </div>`).join('') : `<p class="sub" style="margin-top:14px">${allUsers.length ? 'No emails match.' : 'No emails yet.'}</p>`;
 }
+async function loadMentors() {
+  try {
+    ({ users: allUsers } = await api('/admin/users'));
+    renderMentors();
+  } catch (e) { $('#mList').innerHTML = '<p class="err">' + esc(e.message) + '</p>'; }
+}
+$('#mSearch').addEventListener('input', renderMentors);
+$('#mFilter').addEventListener('click', ev => {
+  const c = ev.target.closest('.chip'); if (!c) return;
+  mFilter = c.dataset.f;
+  document.querySelectorAll('#mFilter .chip').forEach(x => x.classList.toggle('on', x === c));
+  renderMentors();
+});
 $('#mList').addEventListener('click', async ev => {
   const b = ev.target.closest('.tog'); if (!b) return;
   const turnOff = b.dataset.active === 'true';
